@@ -1,16 +1,16 @@
 import "dotenv/config"
-import express from 'express'
-import cors from 'cors'
-import * as errFuncs from './errorHandlers/errorFuncs.js'
+import mongoose from "mongoose"
+import express from "express"
+import cors from "cors"
+import * as errFuncs from "./errorHandlers/errorFuncs.js"
 
-import { connectToServer } from "./utils/mongoConn.js"
+const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.kzdfn.mongodb.net/Worster?retryWrites=true&w=majority`;
 
-connectToServer((err, client) => {
-    if(err) console.log(err)
-})
+mongoose.connect(uri)
 
 // routes
-import mongoRoutes from "./routes/mongocrud.js"
+import groupRouter from "./routes/groupRouter.js"
+import userRouter from "./routes/userRouter.js"
 
 const app = express()
 
@@ -24,7 +24,8 @@ app.get('/', async (req, res) => {
     res.send("Hello World!")
 })
 
-app.use('/mongoDB', mongoRoutes)
+app.use('/groups', groupRouter)
+app.use('/users', userRouter)
 
 app.use(errFuncs.logErrors)
 app.use(errFuncs.clientErrorHandler)
