@@ -4,6 +4,7 @@ import { User } from "../schemas/docSchemas.js"
 
 const userRouter = express.Router()
 
+// creates a user in database
 userRouter.post('/user', async (req, res, next) => {
     try {
         let userDoc = new User(req.body)
@@ -15,7 +16,21 @@ userRouter.post('/user', async (req, res, next) => {
 })
 
 
+userRouter.put('/user/:userEmail', async (req, res, next) => {
+    // TODO: update user from email
+    
+})
 
 
+userRouter.get('/user/:userEmail', async (req, res, next) => {
+    // TODO: get user from email
+
+})
+
+
+userRouter.delete('/user/:userEmail', async (req, res, next) => {
+    // TODO: delete user from email
+    
+})
 
 export default userRouter

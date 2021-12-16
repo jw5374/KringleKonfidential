@@ -11,6 +11,7 @@ const groupSchema = new mongoose.Schema(
     { collection: 'Groups' }
 )
 
+// Schema for a user
 const userSchema = new mongoose.Schema(
     {
         userEmail: String,
@@ -19,7 +20,9 @@ const userSchema = new mongoose.Schema(
     { collection: 'Users' }
 )
 
+// Creating models from the schema
 const User = new mongoose.model("User", userSchema)
 const Group = new mongoose.model("Group", groupSchema)
 
+// Exporting the models for use elsewhere
 export { Group, User }

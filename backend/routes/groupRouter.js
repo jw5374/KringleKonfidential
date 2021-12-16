@@ -5,6 +5,7 @@ import { Group } from "../schemas/docSchemas.js"
 
 const groupRouter = express.Router()
 
+// creates a group in database
 groupRouter.post('/group', async (req, res, next) => {
     try {
         let groupId = crypto.randomInt(10000)
@@ -19,8 +20,18 @@ groupRouter.post('/group', async (req, res, next) => {
     }
 })
 
+groupRouter.put('/group/:groupID', async (req, res, next) => {
+    // TODO: update group from id
+})
 
 
+groupRouter.get('/group/:groupID', async (req, res, next) => {
+    // TODO: get group from id
+})
 
+
+groupRouter.delete('/group/:groupID', async (req, res, next) => {
+    // TODO: delete group from id
+})
 
 export default groupRouter
