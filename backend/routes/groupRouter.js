@@ -8,7 +8,7 @@ const groupRouter = express.Router()
 // creates a group in database
 groupRouter.post('/group', async (req, res, next) => {
     try {
-        let groupId = crypto.randomInt(10000)
+        let groupId = crypto.randomBytes(6).toString('base64')
         let docObj = req.body
         docObj['groupId'] = groupId.toString()
         docObj['passcode'] = crypto.createHash('sha256').update(docObj.passcode).digest('hex')
@@ -20,17 +20,27 @@ groupRouter.post('/group', async (req, res, next) => {
     }
 })
 
+// finds group from groupId and adds a member email to member list
 groupRouter.put('/group/:groupID', async (req, res, next) => {
-    // TODO: update group from id
-
+    try {
+        let updateDoc = await Group.findOne({ "groupId": req.params.groupID })
+        if(updateDoc.length == 0) {
+            res.status(404).send("No group found.")
+        } else {
+            updateDoc.groupMembers.push(req.body.memberEmail)
+            let updated = await updateDoc.save()
+            res.status(200).send(updated)
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
-
+// finds and returns a group based on groupId
 groupRouter.get('/group/:groupID', async (req, res, next) => {
-    // TODO: get group from id
     try {
-        let groupDoc = await Group.find({ "groupId": req.params.groupID })
-        if(groupDoc.length == 0) {
+        let groupDoc = await Group.findOne({ "groupId": req.params.groupID })
+        if(!groupDoc) {
             res.status(404).send("No group found.")
         } else {
             res.status(200).send(groupDoc)
@@ -40,9 +50,18 @@ groupRouter.get('/group/:groupID', async (req, res, next) => {
     }
 })
 
-
+// deletes a group based on groupId
 groupRouter.delete('/group/:groupID', async (req, res, next) => {
-    // TODO: delete group from id
+    try {
+        let removedDoc = await Group.deleteOne({ "groupId": req.params.groupID })
+        if(removedDoc.deletedCount) {
+            res.status(200).send("Success deleted:\n" + JSON.stringify(removedDoc))
+        } else {
+            res.status(404).send("No group deleted, group not found.")
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
 export default groupRouter

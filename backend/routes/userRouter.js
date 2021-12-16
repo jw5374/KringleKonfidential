@@ -15,18 +15,27 @@ userRouter.post('/user', async (req, res, next) => {
     }
 })
 
-
+// finds user from email and adds a groupId to group list (groups they have created)
 userRouter.put('/user/:userEmail', async (req, res, next) => {
-    // TODO: update user from email
-    
+    try {
+        let updateDoc = await User.findOne({ "userEmail": req.params.userEmail })
+        if(updateDoc.length == 0) {
+            res.status(404).send("No user found.")
+        } else {
+            updateDoc.groups.push(req.body.groupId)
+            let updated = await updateDoc.save()
+            res.status(200).send(updated)
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
-
+// finds and returns user based on their email
 userRouter.get('/user/:userEmail', async (req, res, next) => {
-    // TODO: get user from email
     try {
-        let userDoc = await User.find({ "userEmail": req.params.userEmail })
-        if(userDoc.length == 0) {
+        let userDoc = await User.findOne({ "userEmail": req.params.userEmail })
+        if(!userDoc) {
             res.status(404).send("No user found.")
         } else {
             res.status(200).send(userDoc)
@@ -36,10 +45,18 @@ userRouter.get('/user/:userEmail', async (req, res, next) => {
     }
 })
 
-
+// deletes a user based on their email
 userRouter.delete('/user/:userEmail', async (req, res, next) => {
-    // TODO: delete user from email
-    
+    try {
+        let removedDoc = await User.deleteOne({ "userEmail": req.params.userEmail })
+        if(removedDoc.deletedCount) {
+            res.status(200).send("Success deleted:\n" + JSON.stringify(removedDoc))
+        } else {
+            res.status(404).send("No user deleted, user not found.")
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
 export default userRouter
