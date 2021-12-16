@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 
+// This is the Schema for a group.
 const groupSchema = new mongoose.Schema(
     {
         groupId: String,
