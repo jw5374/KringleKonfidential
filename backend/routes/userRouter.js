@@ -24,7 +24,16 @@ userRouter.put('/user/:userEmail', async (req, res, next) => {
 
 userRouter.get('/user/:userEmail', async (req, res, next) => {
     // TODO: get user from email
-
+    try {
+        let userDoc = await User.find({ "userEmail": req.params.userEmail })
+        if(userDoc.length == 0) {
+            res.status(404).send("No user found.")
+        } else {
+            res.status(200).send(userDoc)
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
 

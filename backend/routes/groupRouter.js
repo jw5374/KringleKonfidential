@@ -22,11 +22,22 @@ groupRouter.post('/group', async (req, res, next) => {
 
 groupRouter.put('/group/:groupID', async (req, res, next) => {
     // TODO: update group from id
+
 })
 
 
 groupRouter.get('/group/:groupID', async (req, res, next) => {
     // TODO: get group from id
+    try {
+        let groupDoc = await Group.find({ "groupId": req.params.groupID })
+        if(groupDoc.length == 0) {
+            res.status(404).send("No group found.")
+        } else {
+            res.status(200).send(groupDoc)
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
 
