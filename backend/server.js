@@ -1,16 +1,19 @@
+// module imports
 import "dotenv/config"
-import express from 'express'
-import cors from 'cors'
-import * as errFuncs from './errorHandlers/errorFuncs.js'
+import mongoose from "mongoose"
+import express from "express"
+import cors from "cors"
+import * as errFuncs from "./errorHandlers/errorFuncs.js"
 
-import { connectToServer } from "./utils/mongoConn.js"
+// for mongoDB connection
+const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.kzdfn.mongodb.net/Worster?retryWrites=true&w=majority`;
 
-connectToServer((err, client) => {
-    if(err) console.log(err)
-})
+// connecting
+mongoose.connect(uri)
 
 // routes
-import mongoRoutes from "./routes/mongocrud.js"
+import groupRouter from "./routes/groupRouter.js"
+import userRouter from "./routes/userRouter.js"
 
 const app = express()
 
@@ -24,12 +27,16 @@ app.get('/', async (req, res) => {
     res.send("Hello World!")
 })
 
-app.use('/mongoDB', mongoRoutes)
+// routes from the './routes' directory
+app.use('/groups', groupRouter)
+app.use('/users', userRouter)
 
+// error handlers (using next(error) to pass on errors)
 app.use(errFuncs.logErrors)
 app.use(errFuncs.clientErrorHandler)
 app.use(errFuncs.errorHandler)
 
+// listening on port
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`) // hosted on 35.222.125.83:8080
 })

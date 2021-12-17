@@ -1,5 +1,5 @@
 function logErrors(error, req, res, next) {
-    console.erroror(error.stack)
+    console.error(error.stack)
     next(error)
 }
 
@@ -13,7 +13,7 @@ function clientErrorHandler (error, req, res, next) {
 
 function errorHandler (error, req, res, next) {
     res.status(500)
-    res.render('error', { error: error })
+    res.send(error)
 }
 
 export { logErrors, clientErrorHandler, errorHandler}
