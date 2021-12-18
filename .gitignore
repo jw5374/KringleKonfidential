@@ -2,3 +2,5 @@ node_modules/
 .env
 *.ppk
 .DS_Store
+*.rest
+*.http
