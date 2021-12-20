@@ -14,14 +14,14 @@ groupRouter.post('/group', async (req, res, next) => {
         docObj['passcode'] = crypto.createHash('sha256').update(docObj.passcode).digest('hex')
         let groupDoc = new Group(docObj)
         let saved = await groupDoc.save()
-        res.status(200).send(saved)
+        res.status(201).send(saved)
     } catch (e) {
         next(e)
     }
 })
 
 // finds group from groupId and adds a member email to member list
-groupRouter.put('/group/:groupID', async (req, res, next) => {
+groupRouter.patch('/group/:groupID', async (req, res, next) => {
     try {
         let updateDoc = await Group.findOne({ "groupId": req.params.groupID })
         if(updateDoc.length == 0) {

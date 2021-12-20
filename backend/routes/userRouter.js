@@ -9,14 +9,14 @@ userRouter.post('/user', async (req, res, next) => {
     try {
         let userDoc = new User(req.body)
         let saved = await userDoc.save()
-        res.status(200).send(saved)
+        res.status(201).send(saved)
     } catch (e) {
         next(e)
     }
 })
 
 // finds user from email and adds a groupId to group list (groups they have created)
-userRouter.put('/user/:userEmail', async (req, res, next) => {
+userRouter.patch('/user/:userEmail', async (req, res, next) => {
     try {
         let updateDoc = await User.findOne({ "userEmail": req.params.userEmail })
         if(updateDoc.length == 0) {
