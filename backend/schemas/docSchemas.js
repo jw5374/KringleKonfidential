@@ -8,7 +8,10 @@ const groupSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
-        ownerEmail: String,
+        ownerEmail: {
+            type: String,
+            required: true
+        },
         passcode: String,
         groupMembers: [String]
     },
