@@ -19,7 +19,7 @@ userRouter.post('/user', async (req, res, next) => {
 userRouter.patch('/user/:userEmail', async (req, res, next) => {
     try {
         let updateDoc = await User.findOne({ "userEmail": req.params.userEmail })
-        if(updateDoc.length == 0) {
+        if(!updateDoc) {
             res.status(404).send("No user found.")
         } else {
             updateDoc.groups.push(req.body.groupId)
@@ -31,10 +31,28 @@ userRouter.patch('/user/:userEmail', async (req, res, next) => {
     }
 })
 
+// get all users
+userRouter.get('/user', async (req, res, next) => {
+    if(req.query.userEmail) {
+        next()
+    } else {
+        try {
+            let userDoc = await User.find()
+            if(!userDoc) {
+                res.status(404).send("No users.")
+            } else {
+                res.status(200).send(userDoc)
+            }
+        } catch (e) {
+            next(e)
+        }
+    }
+})
+
 // finds and returns user based on their email
-userRouter.get('/user/:userEmail', async (req, res, next) => {
+userRouter.get('/user', async (req, res, next) => {
     try {
-        let userDoc = await User.findOne({ "userEmail": req.params.userEmail })
+        let userDoc = await User.findOne({ "userEmail": req.query.userEmail })
         if(!userDoc) {
             res.status(404).send("No user found.")
         } else {

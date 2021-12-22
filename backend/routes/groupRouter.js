@@ -8,7 +8,7 @@ const groupRouter = express.Router()
 // creates a group in database
 groupRouter.post('/group', async (req, res, next) => {
     try {
-        let groupId = crypto.randomBytes(6).toString('base64')
+        let groupId = crypto.randomBytes(6).toString('base64url')
         let docObj = req.body
         docObj['groupId'] = groupId.toString()
         docObj['passcode'] = crypto.createHash('sha256').update(docObj.passcode).digest('hex')
@@ -24,7 +24,7 @@ groupRouter.post('/group', async (req, res, next) => {
 groupRouter.patch('/group/:groupID', async (req, res, next) => {
     try {
         let updateDoc = await Group.findOne({ "groupId": req.params.groupID })
-        if(updateDoc.length == 0) {
+        if(!updateDoc) {
             res.status(404).send("No group found.")
         } else {
             updateDoc.groupMembers.push(req.body.memberEmail)
@@ -36,10 +36,29 @@ groupRouter.patch('/group/:groupID', async (req, res, next) => {
     }
 })
 
+// get all groups
+groupRouter.get('/group', async (req, res, next) => {
+    if(req.query.groupID) {
+        next()
+    } else {
+        try {
+            let groupDoc = await Group.find()
+            if(!groupDoc) {
+                res.status(404).send("No groups.")
+            } else {
+                res.status(200).send(groupDoc)
+            }
+        } catch (e) {
+            next(e)
+        }
+    }
+})
+
+
 // finds and returns a group based on groupId
-groupRouter.get('/group/:groupID', async (req, res, next) => {
+groupRouter.get('/group', async (req, res, next) => {
     try {
-        let groupDoc = await Group.findOne({ "groupId": req.params.groupID })
+        let groupDoc = await Group.findOne({ "groupId": req.query.groupID })
         if(!groupDoc) {
             res.status(404).send("No group found.")
         } else {
