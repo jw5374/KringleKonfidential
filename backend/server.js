@@ -38,6 +38,8 @@ app.use(errFuncs.clientErrorHandler)
 app.use(errFuncs.errorHandler)
 
 // listening on port
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`) // hosted on 35.222.125.83:8080
 })
+
+export { app, server }
