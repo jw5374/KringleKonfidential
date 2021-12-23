@@ -4,8 +4,12 @@
   "description": "backend for worster",
   "main": "server.js",
   "type": "module",
+  "jest": {
+    "testEnvironment": "node",
+    "verbose": true
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "author": "jw5374",
   "license": "ISC",
@@ -16,6 +20,8 @@
   },
   "devDependencies": {
     "dotenv": "^10.0.0",
-    "nodemon": "^2.0.15"
+    "jest": "^27.4.5",
+    "nodemon": "^2.0.15",
+    "supertest": "^6.1.6"
   }
 }

@@ -13,7 +13,7 @@ function clientErrorHandler (error, req, res, next) {
 
 function errorHandler (error, req, res, next) {
     res.status(500)
-    res.send(error)
+    res.send(`${error.name}: ${error.message} <br> <br> ${JSON.stringify(error)}`)
 }
 
 export { logErrors, clientErrorHandler, errorHandler}
