@@ -13,6 +13,7 @@ const groupSchema = new mongoose.Schema(
             required: true
         },
         passcode: String,
+        priceRange: String,
         groupMembers: [String]
     },
     { collection: 'Groups' }
