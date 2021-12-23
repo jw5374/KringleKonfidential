@@ -26,12 +26,14 @@ describe("Group Routes", () => {
                 .send({
                     ownerEmail: "example4@test.com",
                     passcode: "somethingthatwillbehashed",
+                    priceRange: "$10",
                     groupMembers: []
                 })
                 .expect("Content-Type", "application/json; charset=utf-8")
             expect(res.statusCode).toBe(201)
             expect(res.body.groupId).toBeDefined()
             expect(res.body.ownerEmail).toBe("example4@test.com")
+            expect(res.body.priceRange).toBe("$10")
             expect(Array.isArray(res.body.groupMembers)).toBe(Array.isArray([]))
             gid = res.body.groupId
         })
@@ -267,6 +269,18 @@ describe("User Routes", () => {
                 .expect("Content-Type", "text/html; charset=utf-8")
             expect(res.statusCode).toBe(404)
             expect(res.text).toEqual("No user found.")
+        })
+
+        it("PATCH /users/user/correctEmail", async () => {
+            const res = await request(app)
+                .patch("/users/user/example@test.com")
+                .send({
+                    removeFlag: true,
+                    groupId: "somegroupId"
+                })
+                .expect("Content-Type", "text/html; charset=utf-8")
+            expect(res.statusCode).toBe(404)
+            expect(res.text).toEqual("Incorrect groupId or groupId not found.")
         })
 
         it("GET /users/user?randomquery=blah", async () => {
