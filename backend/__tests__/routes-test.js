@@ -49,6 +49,19 @@ describe("Group Routes", () => {
             expect(res.body.groupMembers).toContain("example3@test.com")
         })
 
+        it("PATCH /groups/group/<groupId> (duplicate checking)", async () => {
+            const res = await request(app)
+                .patch("/groups/group/" + gid)
+                .send({
+                    memberEmail: "example3@test.com"
+                })
+                .expect("Content-Type", "application/json; charset=utf-8")
+            expect(res.statusCode).toBe(200)
+            expect(res.body.groupId).toBeDefined()
+            expect(res.body.ownerEmail).toBe("example4@test.com")
+            expect(res.body.groupMembers).toHaveLength(1)
+        })
+
         it("GET /groups/group", async () => {
             const res = await request(app)
                 .get("/groups/group")
@@ -162,6 +175,34 @@ describe("User Routes", () => {
             expect(res.body.userEmail).toBe(uemail)
             expect(res.body.groups).toBeDefined()
             expect(res.body.groups).toContain("somegroupID")
+        })
+
+        it("PATCH /users/user/<userEmail> (bad removeFlag)", async () => {
+            const res = await request(app)
+                .patch("/users/user/" + uemail)
+                .send({
+                    removeFlag: false, // or anything that isn't true boolean
+                    groupId: "somegroupID2"
+                })
+                .expect("Content-Type", "application/json; charset=utf-8")
+            expect(res.statusCode).toBe(200)
+            expect(res.body.userEmail).toBe(uemail)
+            expect(res.body.groups).toBeDefined()
+            expect(res.body.groups).toContain("somegroupID2")
+        })
+
+        it("PATCH /users/user/<userEmail> (good removeFlag)", async () => {
+            const res = await request(app)
+                .patch("/users/user/" + uemail)
+                .send({
+                    removeFlag: true,
+                    groupId: "somegroupID2"
+                })
+                .expect("Content-Type", "application/json; charset=utf-8")
+            expect(res.statusCode).toBe(200)
+            expect(res.body.userEmail).toBe(uemail)
+            expect(res.body.groups).toBeDefined()
+            expect(res.body.groups).not.toContain("somegroupID2")
         })
 
         it("GET /users/user", async () => {
