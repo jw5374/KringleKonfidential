@@ -23,13 +23,16 @@ groupRouter.post('/group', async (req, res, next) => {
 // finds group from groupId and adds a member email to member list
 groupRouter.patch('/group/:groupID', async (req, res, next) => {
     try {
-        let updateDoc = await Group.findOne({ "groupId": req.params.groupID })
+        let updateDoc = await Group.findOneAndUpdate(
+            { "groupId": req.params.groupID }, 
+            { $addToSet: { groupMembers: req.body.memberEmail } },
+            { 
+                returnDocument: "after"
+            })
         if(!updateDoc) {
             res.status(404).send("No group found.")
         } else {
-            updateDoc.groupMembers.push(req.body.memberEmail)
-            let updated = await updateDoc.save()
-            res.status(200).send(updated)
+            res.status(200).send(updateDoc) // no feedback when trying to add duplicate
         }
     } catch (e) {
         next(e)
