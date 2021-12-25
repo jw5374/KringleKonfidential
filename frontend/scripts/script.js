@@ -5,7 +5,6 @@ let container = document.querySelector(".groupContainer")
 let parent = document.querySelector(".grid-section.second")
 
 function createGroupElements(groupArray) {
-    console.log(groupArray)
     let elArray = []
     for(let group of groupArray) {
         let groupEl = document.createElement("div")
@@ -26,7 +25,6 @@ function createGroupElements(groupArray) {
 }
 
 function insertGroupElements(groupEls, container) {
-    container
     let docFrag = document.createDocumentFragment()
     for(let el of groupEls) {
         docFrag.appendChild(el)
@@ -44,7 +42,6 @@ submit.addEventListener("click", async () => {
     try {
         clearElements(container)
         let groups
-        console.log(input.value)
         if(input.value) {
             groups = await fetch(fetchURL + "groups/group?groupID=" + input.value, {
                 method: 'GET'
