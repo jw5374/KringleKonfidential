@@ -22,9 +22,30 @@ userRouter.patch('/user/:userEmail', async (req, res, next) => {
         if(!updateDoc) {
             res.status(404).send("No user found.")
         } else {
-            updateDoc.groups.push(req.body.groupId)
-            let updated = await updateDoc.save()
+            if(req.body.removeFlag == true) {
+                res.locals.updateDoc = updateDoc
+                next()
+            } else {
+                updateDoc.groups.push(req.body.groupId)
+                let updated = await updateDoc.save()
+                res.status(200).send(updated)
+            }
+        }
+    } catch (e) {
+        next(e)
+    }
+})
+
+userRouter.patch('/user/:userEmail', async (req, res, next) => {
+    try {
+        let passedUpdateDoc = res.locals.updateDoc
+        let index = passedUpdateDoc.groups.indexOf(req.body.groupId)
+        if(index != -1) {
+            passedUpdateDoc.groups.splice(index, 1)
+            let updated = await passedUpdateDoc.save()
             res.status(200).send(updated)
+        } else {
+            res.status(404).send("Incorrect groupId or groupId not found.")
         }
     } catch (e) {
         next(e)

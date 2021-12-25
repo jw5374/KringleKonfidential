@@ -26,12 +26,14 @@ describe("Group Routes", () => {
                 .send({
                     ownerEmail: "example4@test.com",
                     passcode: "somethingthatwillbehashed",
+                    priceRange: "$10",
                     groupMembers: []
                 })
                 .expect("Content-Type", "application/json; charset=utf-8")
             expect(res.statusCode).toBe(201)
             expect(res.body.groupId).toBeDefined()
             expect(res.body.ownerEmail).toBe("example4@test.com")
+            expect(res.body.priceRange).toBe("$10")
             expect(Array.isArray(res.body.groupMembers)).toBe(Array.isArray([]))
             gid = res.body.groupId
         })
@@ -47,6 +49,19 @@ describe("Group Routes", () => {
             expect(res.body.groupId).toBeDefined()
             expect(res.body.ownerEmail).toBe("example4@test.com")
             expect(res.body.groupMembers).toContain("example3@test.com")
+        })
+
+        it("PATCH /groups/group/<groupId> (duplicate checking)", async () => {
+            const res = await request(app)
+                .patch("/groups/group/" + gid)
+                .send({
+                    memberEmail: "example3@test.com"
+                })
+                .expect("Content-Type", "application/json; charset=utf-8")
+            expect(res.statusCode).toBe(200)
+            expect(res.body.groupId).toBeDefined()
+            expect(res.body.ownerEmail).toBe("example4@test.com")
+            expect(res.body.groupMembers).toHaveLength(1)
         })
 
         it("GET /groups/group", async () => {
@@ -164,6 +179,34 @@ describe("User Routes", () => {
             expect(res.body.groups).toContain("somegroupID")
         })
 
+        it("PATCH /users/user/<userEmail> (bad removeFlag)", async () => {
+            const res = await request(app)
+                .patch("/users/user/" + uemail)
+                .send({
+                    removeFlag: false, // or anything that isn't true boolean
+                    groupId: "somegroupID2"
+                })
+                .expect("Content-Type", "application/json; charset=utf-8")
+            expect(res.statusCode).toBe(200)
+            expect(res.body.userEmail).toBe(uemail)
+            expect(res.body.groups).toBeDefined()
+            expect(res.body.groups).toContain("somegroupID2")
+        })
+
+        it("PATCH /users/user/<userEmail> (good removeFlag)", async () => {
+            const res = await request(app)
+                .patch("/users/user/" + uemail)
+                .send({
+                    removeFlag: true,
+                    groupId: "somegroupID2"
+                })
+                .expect("Content-Type", "application/json; charset=utf-8")
+            expect(res.statusCode).toBe(200)
+            expect(res.body.userEmail).toBe(uemail)
+            expect(res.body.groups).toBeDefined()
+            expect(res.body.groups).not.toContain("somegroupID2")
+        })
+
         it("GET /users/user", async () => {
             const res = await request(app)
                 .get("/users/user")
@@ -226,6 +269,18 @@ describe("User Routes", () => {
                 .expect("Content-Type", "text/html; charset=utf-8")
             expect(res.statusCode).toBe(404)
             expect(res.text).toEqual("No user found.")
+        })
+
+        it("PATCH /users/user/correctEmail", async () => {
+            const res = await request(app)
+                .patch("/users/user/example@test.com")
+                .send({
+                    removeFlag: true,
+                    groupId: "somegroupId"
+                })
+                .expect("Content-Type", "text/html; charset=utf-8")
+            expect(res.statusCode).toBe(404)
+            expect(res.text).toEqual("Incorrect groupId or groupId not found.")
         })
 
         it("GET /users/user?randomquery=blah", async () => {
