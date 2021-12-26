@@ -39,6 +39,28 @@ groupRouter.patch('/group/:groupID', async (req, res, next) => {
     }
 })
 
+//removing user from groups
+groupRouter.patch('/group/:groupID/members', async (req, res, next) => {
+    try {
+        let updateDoc = await Group.findOne({ "groupId": req.params.groupID })
+        if(!updateDoc) {
+            res.status(404).send("No group found.")
+        } else {
+            let index = updateDoc.groupMembers.indexOf(req.body.memberEmail)
+            if(index != -1) {
+                updateDoc.groupMembers.splice(index, 1)
+                let updated = await updateDoc.save()
+                res.status(200).send(updated)
+            } else {
+                res.status(404).send("Incorrect Email or no user in this group.")
+            }
+        }
+        
+    } catch (e) {
+        next(e)
+    }
+})
+
 // get all groups
 groupRouter.get('/group', async (req, res, next) => {
     if(req.query.groupID) {

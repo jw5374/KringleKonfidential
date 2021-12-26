@@ -36,6 +36,7 @@ userRouter.patch('/user/:userEmail', async (req, res, next) => {
     }
 })
 
+// removes group from user.
 userRouter.patch('/user/:userEmail', async (req, res, next) => {
     try {
         let passedUpdateDoc = res.locals.updateDoc
