@@ -9,7 +9,9 @@ const userRouter = express.Router()
 userRouter.post('/user', async (req, res, next) => {
     try {
         let docObj = req.body
-        docObj['passcode'] = crypto.createHash('sha256').update(docObj.passcode).digest('hex')
+        if(docObj.passcode) {
+            docObj['passcode'] = crypto.createHash('sha256').update(docObj.passcode).digest('hex')
+        }
         let userDoc = new User(docObj)
         let saved = await userDoc.save()
         res.status(201).send(saved)

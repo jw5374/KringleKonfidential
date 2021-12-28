@@ -10,7 +10,7 @@ groupRouter.post('/group', async (req, res, next) => {
     try {
         let groupId = crypto.randomBytes(6).toString('base64url')
         let docObj = req.body
-        docObj['groupId'] = groupId.toString()
+        docObj['groupId'] = groupId
         let groupDoc = new Group(docObj)
         let saved = await groupDoc.save()
         res.status(201).send(saved)

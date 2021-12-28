@@ -42,8 +42,11 @@ const userSchema = new mongoose.Schema(
            required: true,
            unique: true
         },
+        passcode: {
+           type: String,
+           required: true
+        },
         name: String,
-        passcode: String,
         groups: Array
     },
     { collection: 'Users' }
