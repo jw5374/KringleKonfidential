@@ -1,14 +1,14 @@
 import mongoose from "mongoose"
 import express from "express"
-import crypto from "crypto"
 import { Group } from "../schemas/docSchemas.js"
+import generalFuncs from "../utils/genOps.js"
 
 const groupRouter = express.Router()
 
 // creates a group in database
 groupRouter.post('/group', async (req, res, next) => {
     try {
-        let groupId = crypto.randomBytes(6).toString('base64url')
+        let groupId = generalFuncs.groupIdGen()
         let docObj = req.body
         docObj['groupId'] = groupId
         let groupDoc = new Group(docObj)

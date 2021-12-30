@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import express from "express"
-import crypto from "crypto"
 import { User } from "../schemas/docSchemas.js"
+import generalFuncs from "../utils/genOps.js"
 
 const userRouter = express.Router()
 
@@ -10,7 +10,7 @@ userRouter.post('/user', async (req, res, next) => {
     try {
         let docObj = req.body
         if(docObj.passcode) {
-            docObj['passcode'] = crypto.createHash('sha256').update(docObj.passcode).digest('hex')
+            docObj['passcode'] = generalFuncs.hashPass(docObj.passcode)
         }
         let userDoc = new User(docObj)
         let saved = await userDoc.save()
