@@ -1,13 +1,13 @@
 import express from "express"
 import { Group } from "../schemas/docSchemas.js"
-import generalFuncs from "../utils/genOps.js"
+import { groupIdGen } from "../utils/genOps.js"
 
 const groupRouter = express.Router()
 
 // creates a group in database
 groupRouter.post('/group', async (req, res, next) => {
     try {
-        let groupId = generalFuncs.groupIdGen()
+        let groupId = groupIdGen()
         let docObj = req.body
         docObj['groupId'] = groupId
         let groupDoc = new Group(docObj)
