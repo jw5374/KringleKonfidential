@@ -1,5 +1,18 @@
 import mongoose from "mongoose"
 
+// schema for group member
+const memberSchema = new mongoose.Schema(
+    {
+        memberEmail: {
+            type: String,
+            required: true
+        },
+        memberName: String,
+        wishlist: String
+    },
+    { _id: false }
+)
+
 // This is the Schema for a group.
 const groupSchema = new mongoose.Schema(
     {
@@ -12,9 +25,11 @@ const groupSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        passcode: String,
+        groupName: String,
+        ownerName: String,
         priceRange: String,
-        groupMembers: [String]
+        dateOfExchange: String,
+        groupMembers: [memberSchema]
     },
     { collection: 'Groups' }
 )
@@ -27,6 +42,11 @@ const userSchema = new mongoose.Schema(
            required: true,
            unique: true
         },
+        passcode: {
+           type: String,
+           required: true
+        },
+        name: String,
         groups: Array
     },
     { collection: 'Users' }

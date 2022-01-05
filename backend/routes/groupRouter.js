@@ -1,17 +1,15 @@
-import mongoose from "mongoose"
 import express from "express"
-import crypto from "crypto"
 import { Group } from "../schemas/docSchemas.js"
+import { groupIdGen } from "../utils/genOps.js"
 
 const groupRouter = express.Router()
 
 // creates a group in database
 groupRouter.post('/group', async (req, res, next) => {
     try {
-        let groupId = crypto.randomBytes(6).toString('base64url')
+        let groupId = groupIdGen()
         let docObj = req.body
-        docObj['groupId'] = groupId.toString()
-        docObj['passcode'] = crypto.createHash('sha256').update(docObj.passcode).digest('hex')
+        docObj['groupId'] = groupId
         let groupDoc = new Group(docObj)
         let saved = await groupDoc.save()
         res.status(201).send(saved)
@@ -24,13 +22,19 @@ groupRouter.post('/group', async (req, res, next) => {
 groupRouter.patch('/group/:groupID', async (req, res, next) => {
     try {
         let updateDoc = await Group.findOneAndUpdate(
-            { "groupId": req.params.groupID }, 
-            { $addToSet: { groupMembers: req.body.memberEmail } },
+            {
+                "groupId": req.params.groupID,
+                "groupMembers.memberEmail": { $ne: req.body.memberEmail }
+            },
             { 
-                returnDocument: "after"
+                $push: { groupMembers: req.body } 
+            },
+            { 
+                returnDocument: "after",
+                runValidators: true
             })
         if(!updateDoc) {
-            res.status(404).send("No group found.")
+            res.status(404).send("No group found, or duplicate member email.")
         } else {
             res.status(200).send(updateDoc) // no feedback when trying to add duplicate
         }
@@ -46,7 +50,7 @@ groupRouter.patch('/group/:groupID/members', async (req, res, next) => {
         if(!updateDoc) {
             res.status(404).send("No group found.")
         } else {
-            let index = updateDoc.groupMembers.indexOf(req.body.memberEmail)
+            let index = updateDoc.groupMembers.findIndex(member => member.memberEmail === req.body.memberEmail)
             if(index != -1) {
                 updateDoc.groupMembers.splice(index, 1)
                 let updated = await updateDoc.save()

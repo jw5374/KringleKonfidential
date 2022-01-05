@@ -25,7 +25,8 @@ describe("Group Routes", () => {
                 .post("/groups/group")
                 .send({
                     ownerEmail: "example4@test.com",
-                    passcode: "somethingthatwillbehashed",
+                    ownerName: "john smith",
+                    groupName: "test group",
                     priceRange: "$10",
                     groupMembers: []
                 })
@@ -33,6 +34,8 @@ describe("Group Routes", () => {
             expect(res.statusCode).toBe(201)
             expect(res.body.groupId).toBeDefined()
             expect(res.body.ownerEmail).toBe("example4@test.com")
+            expect(res.body.ownerName).toBe("john smith")
+            expect(res.body.groupName).toBe("test group")
             expect(res.body.priceRange).toBe("$10")
             expect(Array.isArray(res.body.groupMembers)).toBe(Array.isArray([]))
             gid = res.body.groupId
@@ -42,18 +45,38 @@ describe("Group Routes", () => {
             const res = await request(app)
                 .patch("/groups/group/" + gid)
                 .send({
-                    memberEmail: "example3@test.com"
+                    memberEmail: "example3@test.com",
+                    memberName: "john smith",
+                    wishlist: "something"
                 })
                 .expect("Content-Type", "application/json; charset=utf-8")
+            let memberObj = {
+                memberEmail: "example3@test.com",
+                memberName: "john smith",
+                wishlist: "something"
+            }
             expect(res.statusCode).toBe(200)
             expect(res.body.groupId).toBeDefined()
             expect(res.body.ownerEmail).toBe("example4@test.com")
-            expect(res.body.groupMembers).toContain("example3@test.com")
+            expect(res.body.groupMembers).toContainEqual(memberObj)
         })
 
         it("PATCH /groups/group/<groupId> (duplicate checking)", async () => {
             const res = await request(app)
                 .patch("/groups/group/" + gid)
+                .send({
+                    memberEmail: "example3@test.com",
+                    memberName: "john smith",
+                    wishlist: "something"
+                })
+                .expect("Content-Type", "text/html; charset=utf-8")
+            expect(res.statusCode).toBe(404)
+            expect(res.text).toEqual("No group found, or duplicate member email.")
+        })
+
+        it("PATCH /groups/group/<groupId>/members", async () => {
+            const res = await request(app)
+                .patch("/groups/group/" + gid + "/members")
                 .send({
                     memberEmail: "example3@test.com"
                 })
@@ -61,7 +84,7 @@ describe("Group Routes", () => {
             expect(res.statusCode).toBe(200)
             expect(res.body.groupId).toBeDefined()
             expect(res.body.ownerEmail).toBe("example4@test.com")
-            expect(res.body.groupMembers).toHaveLength(1)
+            expect(res.body.groupMembers).toHaveLength(0)
         })
 
         it("GET /groups/group", async () => {
@@ -79,7 +102,7 @@ describe("Group Routes", () => {
             expect(res.body.groupId).toBe(gid)
             expect(res.body.ownerEmail).toBe("example4@test.com")
             expect(res.body.groupMembers).toBeDefined()
-            expect(res.body.groupMembers).toHaveLength(1)
+            expect(res.body.groupMembers).toHaveLength(0)
         })
         
         it("DELETE /groups/group/<groupId>", async () => {
@@ -97,7 +120,6 @@ describe("Group Routes", () => {
             const res = await request(app)
                 .post("/groups/group")
                 .send({
-                    passcode: "somethingthatwillbehashed",
                     groupMembers: []
                 })
                 .expect("Content-Type", "text/html; charset=utf-8")
@@ -114,7 +136,7 @@ describe("Group Routes", () => {
                 })
                 .expect("Content-Type", "text/html; charset=utf-8")
             expect(res.statusCode).toBe(404)
-            expect(res.text).toEqual("No group found.")
+            expect(res.text).toEqual("No group found, or duplicate member email.")
         })
 
         it("GET /groups/group?randomquery=blah", async () => {
@@ -157,6 +179,7 @@ describe("User Routes", () => {
                 .post("/users/user")
                 .send({
                     userEmail: uemail,
+                    passcode: "somethingthatwillbehashed",
                     groups: []
                 })
                 .expect("Content-Type", "application/json; charset=utf-8")
@@ -220,6 +243,7 @@ describe("User Routes", () => {
                 .get("/users/user?userEmail=" + uemail)
             expect(res.statusCode).toBe(200)
             expect(res.body.userEmail).toBe(uemail)
+            expect(res.body.passcode).toBeDefined()
             expect(res.body.groups).toBeDefined()
             expect(res.body.groups).toContain("somegroupID")
         })
@@ -239,6 +263,7 @@ describe("User Routes", () => {
             const res = await request(app)
                 .post("/users/user")
                 .send({
+                    passcode: "somethingthatwillbehashed",
                     groups: []
                 })
                 .expect("Content-Type", "text/html; charset=utf-8")
@@ -252,12 +277,26 @@ describe("User Routes", () => {
                 .post("/users/user")
                 .send({
                     userEmail: "example4@test.com",
+                    passcode: "somethingthatwillbehashed",
                     groups: []
                 })
                 .expect("Content-Type", "text/html; charset=utf-8")
             expect(res.statusCode).toBe(500)
             expect(console.error).toHaveBeenCalled()
             expect(res.text).toContain("MongoServerError: E11000 duplicate key error collection")
+        })
+
+        it("POST /users/user (No passcode)", async () => {
+            const res = await request(app)
+                .post("/users/user")
+                .send({
+                    userEmail: "example7@test.com",
+                    groups: []
+                })
+                .expect("Content-Type", "text/html; charset=utf-8")
+            expect(res.statusCode).toBe(500)
+            expect(console.error).toHaveBeenCalled()
+            expect(res.text).toContain("ValidationError: User validation failed: passcode: Path `passcode` is required.")
         })
         
         it("PATCH /users/user/incorrectEmail", async () => {

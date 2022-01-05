@@ -1,13 +1,17 @@
-import mongoose from "mongoose"
 import express from "express"
 import { User } from "../schemas/docSchemas.js"
+import { hashPass } from "../utils/genOps.js"
 
 const userRouter = express.Router()
 
 // creates a user in database
 userRouter.post('/user', async (req, res, next) => {
     try {
-        let userDoc = new User(req.body)
+        let docObj = req.body
+        if(docObj.passcode) {
+            docObj['passcode'] = hashPass(docObj.passcode)
+        }
+        let userDoc = new User(docObj)
         let saved = await userDoc.save()
         res.status(201).send(saved)
     } catch (e) {
