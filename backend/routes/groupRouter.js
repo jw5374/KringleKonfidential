@@ -1,6 +1,7 @@
 import express from "express"
 import { Group } from "../schemas/docSchemas.js"
 import { groupIdGen } from "../utils/genOps.js"
+import groupOps from "../utils/groupOps.js"
 
 const groupRouter = express.Router()
 
@@ -13,6 +14,40 @@ groupRouter.post('/group', async (req, res, next) => {
         let groupDoc = new Group(docObj)
         let saved = await groupDoc.save()
         res.status(201).send(saved)
+    } catch (e) {
+        next(e)
+    }
+})
+
+// testing email route
+groupRouter.post('/group/email', async (req, res, next) => {
+    try {
+        let response = await groupOps.sendEmail(req.body.matched)
+        res.status(response.statusCode).send(response)
+    } catch (e) {
+        next(e)
+    }
+})
+
+
+groupRouter.post('/group/:groupId', async (req, res, next) => {
+    try {
+        let group = await Group.findOne({ "groupId": req.params.groupId })
+        if(!group) {
+            res.status(404).send("No group found.")
+        } else {
+            let details = {
+                groupName: group.groupName,
+                ownerName: group.ownerName,
+                pricing: group.priceRange,
+                date: group.dateOfExchange
+            }
+            let memberMails = group.groupMembers
+            groupOps.shuffleMembers(memberMails)
+            let matched = groupOps.matchMembers(memberMails)
+            let response = await groupOps.sendEmails(matched, details)
+            res.status(response[0].statusCode).send(response)
+        }
     } catch (e) {
         next(e)
     }
